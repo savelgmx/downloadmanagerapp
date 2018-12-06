@@ -1,31 +1,99 @@
 package fb.fandroid.adv.downloadmanagerapp;
 
 import android.Manifest;
+import android.app.DownloadManager;
+import android.app.NotificationManager;
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.PackageManager;
+import android.net.Uri;
 import android.os.Build;
-import android.support.v4.app.ActivityCompat;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.os.Environment;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.NotificationCompat;
+import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
+import android.view.View;
+import android.widget.Button;
 import android.widget.Toast;
+
+import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity {
 
+    private DownloadManager downloadManager;
+    private long refid;    //отправляется в broadcast receiver
+    private Uri Download_Uri; //http://www.yaplakal.com/html/static/top-logo.png
+    ArrayList<Long> list = new ArrayList<>();
+
+    protected Button mButtonOne;
+    protected Button mButtonTwo;
+
+    //-----обработка нажатия на кнопки
+    private View.OnClickListener mOnButtonOneClickListener;
+    private View.OnClickListener mOnButtonTwoClickListener;
+
+    {
+        mOnButtonOneClickListener = new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+                //здесь мы производим загрузку 1 файла через класс DownloadManager
+                list.clear();
+                DownloadManager.Request request = new DownloadManager.Request(Download_Uri);
+                request.setAllowedNetworkTypes(DownloadManager.Request.NETWORK_WIFI | DownloadManager.Request.NETWORK_MOBILE);
+                request.setAllowedOverRoaming(false);
+                request.setTitle("YP Downloading " + "YapLogo" + ".png");
+                request.setDescription("Downloading " + "YapLogo" + ".png");
+                request.setVisibleInDownloadsUi(true);
+                request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, "/Yaplakal/"  + "/" + "YapLogo" + ".png");
+                refid = downloadManager.enqueue(request);
+                list.add(refid);
+                Log.e("OUT", "" + refid);
+              }
+
+        };
+    }
+
+    {
+        mOnButtonTwoClickListener = new View.OnClickListener(){
+            @Override
+            public void onClick(View view){
+                //здесь показваем загруженное изображение
+            }
+
+        };
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        downloadManager = (DownloadManager) getSystemService(Context.DOWNLOAD_SERVICE);
 
-        if (!isStoragePermissionGranted())
-        {
+        registerReceiver(onComplete, new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE)); //будем использвать бродкаст ресивер для сигнала об окончании загрузки
+        Download_Uri = Uri.parse("http://www.yaplakal.com/html/static/top-logo.png");
+
+        mButtonOne =findViewById(R.id.buttonOne);
+        mButtonTwo =findViewById(R.id.buttonTwo);
+        mButtonOne.setOnClickListener(mOnButtonOneClickListener);//иницыализируем обработчик нажатия на кнопки
+        mButtonTwo.setOnClickListener(mOnButtonTwoClickListener);
+        mButtonTwo.setEnabled(false);
+
+
+        if (!isStoragePermissionGranted()) {
             //разрешений нет работу прекращаем
-            Toast.makeText(this,"Не удалось получить разрешение на запись во внешнее хранилище ",Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Не удалось получить разрешение на запись во внешнее хранилище ", Toast.LENGTH_SHORT).show();
+            System.exit(1);
         }
 
     }
 
-    public  boolean isStoragePermissionGranted() {//проверим разрешение на запись во внешнее хранилище  WRITE_EXTERNAL_STORAGE
+    public boolean isStoragePermissionGranted() {//проверим разрешение на запись во внешнее хранилище  WRITE_EXTERNAL_STORAGE
         if (Build.VERSION.SDK_INT >= 23) {
             if (checkSelfPermission(android.Manifest.permission.WRITE_EXTERNAL_STORAGE)
                     == PackageManager.PERMISSION_GRANTED) {
@@ -34,10 +102,50 @@ public class MainActivity extends AppCompatActivity {
                 ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 1);
                 return false;
             }
-        }
-        else { //На sdk<23 разрешение выдается автоматически при установке программы
+        } else { //На sdk<23 разрешение выдается автоматически при установке программы
             return true;
         }
     }
+
+    BroadcastReceiver onComplete = new BroadcastReceiver() {
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+
+            long referenceId = intent.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, -1);
+            Log.e("IN", "" + referenceId);
+
+
+            list.remove(referenceId);
+
+
+            if (list.isEmpty()) {
+
+
+                Log.e("INSIDE", "" + referenceId);
+                NotificationCompat.Builder mBuilder =
+                        new NotificationCompat.Builder(MainActivity.this)
+                                .setSmallIcon(R.mipmap.ic_launcher)
+                                .setContentTitle("ImageDownLoading")
+                                .setContentText("All Download completed");
+                NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+                notificationManager.notify(455, mBuilder.build());
+
+               mButtonTwo.setEnabled(true); //теперь можно и загрузить картинку
+            }
+
+        }
+    };
+
+    protected void onDestroy() {
+
+
+        super.onDestroy();
+
+        unregisterReceiver(onComplete); //уничтожаем ненужный BroadcastReceiver
+
+    }
+
+
 
 }
