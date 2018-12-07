@@ -18,9 +18,20 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.Toast;
 
 import java.util.ArrayList;
+
+/*
+https://www.google.ru/search?newwindow=1&ei=VeQIXLyNK8ilsgH4oJnYCg&q=android+imageview+set+image+from+url&oq=android+imageview+set+image&gs_l=psy-ab.1.0.0i71l8.0.0..494166...0.0..0.0.0.......0......gws-wiz.1E4TO5aPbQw
+
+https://medium.com/@crossphd/android-image-loading-from-a-string-url-6c8290b82c5e
+        https://android--code.blogspot.com/2015/08/android-imageview-set-image-from.html
+        https://android--code.blogspot.com/2015/08/android-imageview-set-image-from-url.html
+*/
+
 
 public class MainActivity extends AppCompatActivity {
 
@@ -29,8 +40,10 @@ public class MainActivity extends AppCompatActivity {
     private Uri Download_Uri; //http://www.yaplakal.com/html/static/top-logo.png
     ArrayList<Long> list = new ArrayList<>();
 
-    protected Button mButtonOne;
-    protected Button mButtonTwo;
+    private Button mButtonOne;
+    private Button mButtonTwo;
+    private EditText mEditText;
+    private ImageView mImageView;
 
     //-----обработка нажатия на кнопки
     private View.OnClickListener mOnButtonOneClickListener;
@@ -68,6 +81,20 @@ public class MainActivity extends AppCompatActivity {
         };
     }
 
+    {
+        mOnButtonTwoClickListener = new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                    mImageView.setImageDrawable(getDrawable(R.drawable.sun));
+                }
+
+
+            }
+        };
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -80,9 +107,16 @@ public class MainActivity extends AppCompatActivity {
 
         mButtonOne =findViewById(R.id.buttonOne);
         mButtonTwo =findViewById(R.id.buttonTwo);
+        mEditText =findViewById(R.id.editText);
+        mImageView=findViewById(R.id.imageView);
+
         mButtonOne.setOnClickListener(mOnButtonOneClickListener);//иницыализируем обработчик нажатия на кнопки
         mButtonTwo.setOnClickListener(mOnButtonTwoClickListener);
         mButtonTwo.setEnabled(false);
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            mImageView.setImageDrawable(getDrawable(R.drawable.sun));
+        }
 
 
         if (!isStoragePermissionGranted()) {
@@ -132,6 +166,7 @@ public class MainActivity extends AppCompatActivity {
                 notificationManager.notify(455, mBuilder.build());
 
                mButtonTwo.setEnabled(true); //теперь можно и загрузить картинку
+
             }
 
         }
