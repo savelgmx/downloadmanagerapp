@@ -35,6 +35,8 @@ https://medium.com/@crossphd/android-image-loading-from-a-string-url-6c8290b82c5
 
 public class MainActivity extends AppCompatActivity {
 
+    public static final String URL_REGEX = "^((https?|ftp):\\/\\/|(www|ftp)\\.)?[a-z0-9-]+(\\.[a-z0-9-]+)+([\\/?].*)?$";
+
     private DownloadManager downloadManager;
     private long refid;    //отправляется в broadcast receiver
     private Uri Download_Uri; //http://www.yaplakal.com/html/static/top-logo.png
@@ -75,23 +77,14 @@ public class MainActivity extends AppCompatActivity {
         mOnButtonTwoClickListener = new View.OnClickListener(){
             @Override
             public void onClick(View view){
-                //здесь показваем загруженное изображение
-            }
-
-        };
-    }
-
-    {
-        mOnButtonTwoClickListener = new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                    mImageView.setImageDrawable(getDrawable(R.drawable.sun));
-                }
-
+/*
+               сначала мы здесь проверяем введеный EditText на ссответвие REGEXP
+               т.е. явлвяется ли  это УРЛом вида https://yaplakal.com
+                Заодно проверим 3 последних символа в ссылке
+*/
 
             }
+
         };
     }
 
