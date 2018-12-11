@@ -18,6 +18,7 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.NotificationCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.util.Patterns;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -82,6 +83,27 @@ public class MainActivity extends AppCompatActivity {
     private View.OnClickListener mOnButtonOneClickListener;
     private View.OnClickListener mOnButtonTwoClickListener;
 
+    private boolean validateURL(String urlString){
+/*
+        проверяем УРЛ в переданной строке на предмет правильности
+        т.е.соответвие шаблону  android.util.Patterns.WEB_URL
+        если неправльный УРЛ то возвращаем false
+        и еще проверяем 3 последних символа в строке
+        Если ссылка, не оканчивается на .jpeg/.png/.bmp то возвращаем false
+*/
+
+        if ( Patterns.WEB_URL.matcher(urlString).find() ){
+
+            return true;
+        }
+        else {
+            Toast.makeText(this, "URL неправильный должно быть https",Toast.LENGTH_SHORT).show();
+            return false;
+        }
+
+
+    }
+
     {
         mOnButtonOneClickListener = new View.OnClickListener() {
             @Override
@@ -92,19 +114,27 @@ public class MainActivity extends AppCompatActivity {
                 Заодно проверим 3 последних символа в ссылке
                Если ссылка, не оканчивается на .jpeg/.png/.bmp то выходим
 */
+                if ( !validateURL(String.valueOf(mEditText.getText()))  ) {
 
-                //здесь мы производим загрузку 1 файла через класс DownloadManager
-                list.clear();
-                DownloadManager.Request request = new DownloadManager.Request(Download_Uri);
-                request.setAllowedNetworkTypes(DownloadManager.Request.NETWORK_WIFI | DownloadManager.Request.NETWORK_MOBILE);
-                request.setAllowedOverRoaming(false);
-                request.setTitle("YP Downloading " + "YapLogo" + ".png");
-                request.setDescription("Downloading " + "YapLogo" + ".png");
-                request.setVisibleInDownloadsUi(true);
-                request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, "/Yaplakal/"  + "/" + "YapLogo" + ".png");
-                refid = downloadManager.enqueue(request);
-                list.add(refid);
-                Log.e("OUT", "" + refid);
+                    System.exit(1);
+                }
+                else {
+
+                    Download_Uri = Uri.parse( String.valueOf(mEditText.getText()) );
+                    //здесь мы производим загрузку 1 файла через класс DownloadManager
+                    list.clear();
+                    DownloadManager.Request request = new DownloadManager.Request(Download_Uri);
+                    request.setAllowedNetworkTypes(DownloadManager.Request.NETWORK_WIFI | DownloadManager.Request.NETWORK_MOBILE);
+                    request.setAllowedOverRoaming(false);
+                    request.setTitle("YP Downloading " + "YapLogo" + ".png");
+                    request.setDescription("Downloading " + "YapLogo" + ".png");
+                    request.setVisibleInDownloadsUi(true);
+                    request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, "/Yaplakal/" + "/" + "YapLogo" + ".png");
+                    refid = downloadManager.enqueue(request);
+                    list.add(refid);
+                    Log.e("OUT", "" + refid);
+                }
+
             }
 
         };
@@ -135,8 +165,7 @@ public class MainActivity extends AppCompatActivity {
         downloadManager = (DownloadManager) getSystemService(Context.DOWNLOAD_SERVICE);
 
         registerReceiver(onComplete, new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE)); //будем использвать бродкаст ресивер для сигнала об окончании загрузки
-        Download_Uri = Uri.parse("http://www.yaplakal.com/html/static/top-logo.png");
-
+        //Download_Uri = Uri.parse("http://www.yaplakal.com/html/static/top-logo.png");
 
 
         mButtonOne =findViewById(R.id.buttonOne);
@@ -148,12 +177,7 @@ public class MainActivity extends AppCompatActivity {
         mButtonTwo.setOnClickListener(mOnButtonTwoClickListener);
         mButtonTwo.setEnabled(false);
 
-/*
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            mImageView.setImageDrawable(getDrawable(R.drawable.sun));
-        }
-*/
-
+        mEditText.setText("http://www.yaplakal.com/html/static/top-logo.png");
 
         if (!isStoragePermissionGranted()) {
             //разрешений нет работу прекращаем
