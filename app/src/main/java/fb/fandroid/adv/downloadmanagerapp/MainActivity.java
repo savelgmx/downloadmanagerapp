@@ -88,13 +88,31 @@ public class MainActivity extends AppCompatActivity {
         проверяем УРЛ в переданной строке на предмет правильности
         т.е.соответвие шаблону  android.util.Patterns.WEB_URL
         если неправльный УРЛ то возвращаем false
-        и еще проверяем 3 последних символа в строке
-        Если ссылка, не оканчивается на .jpeg/.png/.bmp то возвращаем false
+
 */
 
         if ( Patterns.WEB_URL.matcher(urlString).find() ){
 
-            return true;
+ /*           и еще проверяем 3 последних символа в строке
+            Если ссылка, не оканчивается на .jpeg/.png/.bmp то возвращаем false
+*/
+
+            urlString.lastIndexOf("/");
+            String strExt=urlString.substring(urlString.lastIndexOf(".")+1, urlString.length());
+            strExt.toLowerCase();
+
+            switch (strExt.toLowerCase()){
+                case "jpeg":
+                    return true;
+                case "png":
+                    return true;
+                case "bmp":
+                    return true;
+                default:
+                    Toast.makeText(this,"Wrong file extention",Toast.LENGTH_SHORT).show();
+                    return false;
+            }
+
         }
         else {
             Toast.makeText(this, "URL неправильный должно быть https",Toast.LENGTH_SHORT).show();
@@ -144,6 +162,9 @@ public class MainActivity extends AppCompatActivity {
         mOnButtonTwoClickListener = new View.OnClickListener(){
             @Override
             public void onClick(View view){
+
+
+
                 File imgFile = new  File("/sdcard/"+Environment.DIRECTORY_DOWNLOADS+"/Yaplakal/"  + "/" + "YapLogo" + ".png");
 
                 if(imgFile.exists()) {
