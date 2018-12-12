@@ -28,15 +28,6 @@ import android.widget.Toast;
 import java.io.File;
 import java.util.ArrayList;
 
-/*
-https://www.google.ru/search?newwindow=1&ei=VeQIXLyNK8ilsgH4oJnYCg&q=android+imageview+set+image+from+url&oq=android+imageview+set+image&gs_l=psy-ab.1.0.0i71l8.0.0..494166...0.0..0.0.0.......0......gws-wiz.1E4TO5aPbQw
-
-https://medium.com/@crossphd/android-image-loading-from-a-string-url-6c8290b82c5e
-        https://android--code.blogspot.com/2015/08/android-imageview-set-image-from.html
-        https://android--code.blogspot.com/2015/08/android-imageview-set-image-from-url.html
-*/
-
-
 public class MainActivity extends AppCompatActivity {
 
     public static final String URL_REGEX = "^((https?|ftp):\\/\\/|(www|ftp)\\.)?[a-z0-9-]+(\\.[a-z0-9-]+)+([\\/?].*)?$";
@@ -83,14 +74,17 @@ public class MainActivity extends AppCompatActivity {
     private View.OnClickListener mOnButtonOneClickListener;
     private View.OnClickListener mOnButtonTwoClickListener;
 
+    private void showMessage(String string) {
+        Toast.makeText(this, string, Toast.LENGTH_LONG).show();
+    }
+
+
     private boolean validateURL(String urlString){
 /*
         проверяем УРЛ в переданной строке на предмет правильности
         т.е.соответвие шаблону  android.util.Patterns.WEB_URL
         если неправльный УРЛ то возвращаем false
-
 */
-
         if ( Patterns.WEB_URL.matcher(urlString).find() ){
 
  /*           и еще проверяем 3 последних символа в строке
@@ -109,13 +103,14 @@ public class MainActivity extends AppCompatActivity {
                 case "bmp":
                     return true;
                 default:
-                    Toast.makeText(this,"Wrong file extention",Toast.LENGTH_SHORT).show();
+
+                    showMessage("неверный формат ссылки");//выдача сообщения обшибке ввода
                     return false;
             }
 
         }
         else {
-            Toast.makeText(this, "URL неправильный должно быть https",Toast.LENGTH_SHORT).show();
+            showMessage("URL неправильный должно быть https");//выдача сообщения обшибке ввода
             return false;
         }
 
@@ -134,7 +129,7 @@ public class MainActivity extends AppCompatActivity {
 */
                 if ( !validateURL(String.valueOf(mEditText.getText()))  ) {
 
-                    System.exit(1);
+                    showMessage("пустой, бессвязный набор символов а не ссылка");
                 }
                 else {
 
@@ -203,6 +198,7 @@ public class MainActivity extends AppCompatActivity {
         if (!isStoragePermissionGranted()) {
             //разрешений нет работу прекращаем
             Toast.makeText(this, "Не удалось получить разрешение на запись во внешнее хранилище ", Toast.LENGTH_SHORT).show();
+            Log.e("OUT","No Write permission");
             System.exit(1);
         }
 
@@ -223,14 +219,8 @@ public class MainActivity extends AppCompatActivity {
     }
 
     protected void onDestroy() {
-
-
         super.onDestroy();
-
         unregisterReceiver(onComplete); //уничтожаем ненужный BroadcastReceiver
-
     }
-
-
 
 }
